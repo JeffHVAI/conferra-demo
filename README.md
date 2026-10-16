@@ -1,0 +1,46 @@
+# CONFERRA Credential Demo
+
+Front-end sandbox demo of **Project CONFERRA**, the Sovereign Academic Credential Engine built by Verisset Canada for the Global University Systems / University of Niagara Falls Canada (UNF) pilot. SkyeConnex provides the sovereignty and custody layer.
+
+> **Sandbox only.** Every student record is fictional and SkyeConnex API responses are simulated in the browser. The SHA-256 fingerprints and Merkle inclusion proofs are computed for real with Web Crypto. Documents carry a "SPECIMEN · SANDBOX" watermark.
+
+## What the demo shows
+
+| Tab | Persona | PRD feature set |
+| --- | --- | --- |
+| 1 · Registrar console | Campus registrar | CSV / SIS HTML ingestion, batch issuance, pipeline log, 500-package capacity check |
+| 2 · Sealing & custody | Backend (SkyeConnex) | Package contents, custody record JSON, RS(6,3) shard placement on Canadian nodes with a node-outage simulation, Merkle inclusion proof |
+| 3 · Graduate wallet | Graduate | Apple / Google Wallet pass with live QR, ZIP evidence package, expiring read-only share links |
+| 4 · Employer verification | Employer, licensing board, WES | Verify by link/code, simulated QR scan, or file drop (hashed locally, never uploaded); green / red / revoked / expired results; tamper lab |
+| Audit & reconciliation | Registrar, finance | KPIs, revoke/reinstate, custody log, verification log, monthly $60 fee / $5 dividend report with CSV export |
+
+## Architecture (as demoed)
+
+```
+CONFERRA  = credential business logic   (ingestion, rendering, hashing, wallet, sharing, reporting)
+SkyeConnex = sovereign trust infrastructure (encrypted storage, sharding, Merkle custody log, verification, CA residency)
+```
+
+The demo is a single static file, `index.html`. It has no build step, and its only external dependencies are Google Fonts and `qrcodejs` from cdnjs.
+
+## Run locally
+
+Open `index.html` in a browser, or serve the folder:
+
+```bash
+python -m http.server 8765
+```
+
+Then visit http://localhost:8765.
+
+## Deploy
+
+`.github/workflows/static.yml` deploys the repository to GitHub Pages on every push to `main`. In the GitHub repo, set **Settings → Pages → Source** to **GitHub Actions**.
+
+## Next steps toward the Phase 1 pilot
+
+- Replace the simulated SkyeConnex calls with a connector service (store asset, retrieve asset, retrieve custody record).
+- Real PDF rendering from approved institutional templates, plus `.pkpass` and Google Wallet object generation.
+- Back end: .NET 8 or Node.js with PostgreSQL. Front end: React + Tailwind.
+
+See `docs/` for the source PRD notes.
