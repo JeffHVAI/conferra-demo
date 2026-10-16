@@ -33,6 +33,14 @@ python -m http.server 8765
 
 Then visit http://localhost:8765.
 
+## Sample data
+
+`samples/unf-graduating-class-fall-2026.csv` is a fictional 50-graduate Fall 2026 class laid out like a registrar's SIS export: 22 MSc Data Analytics, 16 MBA and 12 BBA graduates, with email, faculty, level, citizenship, honours, standing and course grades. Upload it in the Registrar console to issue a full batch. The demo ignores the extra columns. To regenerate it (the seed is fixed):
+
+```bash
+python scripts/generate_sample_cohort.py
+```
+
 ## Deploy
 
 `.github/workflows/static.yml` deploys the repository to GitHub Pages on every push to `main`. In the GitHub repo, set **Settings → Pages → Source** to **GitHub Actions**.
