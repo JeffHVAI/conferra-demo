@@ -12,7 +12,9 @@ Front-end sandbox demo of **Project CONFERRA**, the Sovereign Academic Credentia
 | 2 · Sealing & custody | Backend (SkyeConnex) | Package contents, custody record JSON, RS(6,3) shard placement on Canadian nodes with a node-outage simulation, Merkle inclusion proof |
 | 3 · Graduate wallet | Graduate | Apple / Google Wallet pass with live QR, ZIP evidence package, expiring read-only share links |
 | 4 · Employer verification | Employer, licensing board, WES | Verify by link/code, simulated QR scan, or file drop (hashed locally, never uploaded); green / red / revoked / expired results; tamper lab |
-| Audit & reconciliation | Registrar, finance | KPIs, revoke/reinstate, custody log, verification log, monthly $60 fee / $5 dividend report with CSV export |
+| Audit & reconciliation | Registrar, finance | KPIs, revoke/reinstate, custody log, verification log, monthly $60 fee / $5 dividend report with CSV export, tenancy roles and scoped API keys, activity audit log |
+
+It also covers the platform features in SkyeConnex's *CONFERRA on SkyeConnex* brief (16 Oct 2026): a Platform fit table (Exists / Partial / Build), REST API / S3 gateway / MCP ingestion channels, re-hash on receipt, worker-queue batches, shards dealt across Canadian vendors with a legal-order test, signed Merkle checkpoints (ML-DSA-87 + Ed25519, simulated) with an RFC 3161 anchor, the issuance record linked to its custody entry, a live self-hosted pass with native passes pending issuer approval, share links with expiry, view cap and password, a custody proof in the evidence ZIP, and an "Acting as" role switcher.
 
 ## Architecture (as demoed)
 

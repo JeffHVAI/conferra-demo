@@ -310,6 +310,35 @@ pre.code{margin:0;background:var(--code-bg);color:var(--code-fg);font:12px/1.6 v
 .tx .key{font-size:.72rem;color:var(--paper-muted);border-top:1px solid var(--paper-line);padding-top:10px}
 .tx .tablewrap{border-color:var(--paper-line)}
 
+/* platform-fit additions */
+.actas{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+.actas select{padding:4px 8px;font-size:.82rem}
+details.fit{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 18px}
+details.fit summary{cursor:pointer;padding:14px 0;font-weight:600;font-size:.95rem}
+details.fit[open] summary{border-bottom:1px solid var(--line);margin-bottom:14px}
+details.fit .tablewrap{margin-bottom:16px}
+details.fit td{white-space:normal;min-width:140px;vertical-align:top}
+.vendors{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}
+.vendor{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.84rem}
+.vendor.served{background:var(--warn-soft);border-color:transparent}
+.vendor .vh{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.vendor .ep{font:11px var(--f-mono);color:var(--muted);overflow-wrap:anywhere}
+.cipher{font:11px/1.5 var(--f-mono);background:var(--code-bg);color:var(--code-dim);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere;max-height:96px;overflow:hidden}
+.channel-snippet{margin-top:4px}
+.pending-badge{font-size:.7rem}
+.webpass{background:#FFFFFF;border-radius:14px;overflow:hidden;color:#1D1A16;box-shadow:0 6px 18px rgba(0,0,0,.14);display:flex;flex-direction:column}
+.webpass .urlbar{background:#E9E9EC;color:#555;font:500 .68rem var(--f-mono);padding:6px 10px;display:flex;gap:6px;align-items:center}
+.webpass .urlbar svg{width:11px;height:11px}
+.webpass .wb{padding:14px;display:flex;flex-direction:column;gap:10px}
+.webpass .wh{display:flex;gap:10px;align-items:center;border-bottom:2px solid var(--pass-bg);padding-bottom:10px}
+.webpass .wh svg{width:26px;height:30px;color:var(--pass-bg)}
+.webpass .lab{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:#6B6253}
+.webpass .val{font-size:.92rem;font-weight:500;line-height:1.25}
+.webpass .big{font:400 1.4rem/1.15 var(--f-display)}
+.webpass .qrbox{background:#FFFFFF;border:1px solid #E0E0E0;border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#111;cursor:pointer;width:100%}
+.webpass .qrbox small{font:500 .7rem var(--f-mono)}
+.webpass .live{font-size:.68rem;color:#16714A;font-weight:600}
+.unlock{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -322,7 +351,16 @@ pre.code{margin:0;background:var(--code-bg);color:var(--code-fg);font:12px/1.6 v
       <span class="wordmark">CONFERRA</span>
       <small>Sovereign Academic Credential Engine · University of Niagara Falls Canada pilot</small>
     </div>
-    <span class="sov"><span class="dot"></span>Custody: SkyeConnex · Canada-only nodes</span>
+    <div class="row">
+      <label class="actas" for="role-sel">Acting as
+        <select id="role-sel">
+          <option value="admin">Registrar admin</option>
+          <option value="staff">Registrar staff</option>
+          <option value="finance">Finance viewer</option>
+        </select>
+      </label>
+      <span class="sov"><span class="dot"></span>Tenancy unf-sandbox · SkyeConnex · Canada-only</span>
+    </div>
   </div>
 </header>
 <div class="sandbox"><div class="wrap">Phase 1 sandbox. All student records are fictional, and SkyeConnex API responses are simulated in this browser. SHA-256 fingerprints and Merkle proofs are computed for real.</div></div>
@@ -363,6 +401,16 @@ pre.code{margin:0;background:var(--code-bg);color:var(--code-fg);font:12px/1.6 v
     <div class="card">
       <div class="card-h"><h3>Preview</h3><span class="note" id="parse-summary"></span></div>
       <div id="preview"></div>
+      <div class="row">
+        <label class="field" for="channel-sel">Send to SkyeConnex through
+          <select id="channel-sel">
+            <option value="rest">REST API (scoped, expiring key)</option>
+            <option value="s3">S3 gateway (bulk ingestion)</option>
+            <option value="mcp">MCP tools (agent-driven)</option>
+          </select>
+        </label>
+      </div>
+      <pre class="code channel-snippet" id="channel-snippet"></pre>
       <div class="issue-row">
         <button class="btn primary big" data-action="issue" id="issue-btn">Issue and seal cohort</button>
         <span class="note" id="issue-note"></span>
@@ -397,8 +445,29 @@ pre.code{margin:0;background:var(--code-bg);color:var(--code-fg);font:12px/1.6 v
   </div>
   <div class="split">
     <div><span class="layer" style="align-self:flex-start">CONFERRA</span><b>Credential business logic</b><ul><li>CSV / SIS HTML ingestion</li><li>Diploma and transcript rendering</li><li>Client-side SHA-256</li><li>Wallet passes, share links, reporting</li></ul></div>
-    <div><span class="layer sx" style="align-self:flex-start">SkyeConnex</span><b>Sovereign trust infrastructure</b><ul><li>Encrypted storage (AES-256-GCM)</li><li>Erasure-coded sharding, RS(6,3)</li><li>Merkle custody log and audit metadata</li><li>Verification lookups, Canadian residency</li></ul></div>
+    <div><span class="layer sx" style="align-self:flex-start">SkyeConnex</span><b>Sovereign trust infrastructure</b><ul><li>Encryption, RS(6,3) erasure coding, shards dealt across Canadian vendors</li><li>Custody log with signed Merkle checkpoints and RFC 3161 time anchors</li><li>Verification, expiring share links, tenancy, roles, audit log</li><li>REST API, S3 gateway and MCP tools</li></ul></div>
   </div>
+  <details class="fit">
+    <summary>Platform fit: what SkyeConnex provides today, and what CONFERRA adds</summary>
+    <div class="legend" style="margin-bottom:10px"><span><i class="pill ok">Exists</i> in the platform today</span><span><i class="pill warn">Partial</i> primitive exists, product shapes it</span><span><i class="pill bad">Build</i> product work, little or no reuse</span></div>
+    <div class="tablewrap"><table><thead><tr><th>PRD requirement</th><th>Status</th><th>SkyeConnex today</th><th>CONFERRA adds</th><th>Where in this demo</th></tr></thead><tbody>
+      <tr><td>Client-side SHA-256 before transmission</td><td><span class="pill ok">Exists</span></td><td>Chunks hashed in the browser, re-hashed on receipt; a mismatch is refused</td><td>Nothing</td><td>Registrar pipeline, SHA-256 step and console</td></tr>
+      <tr><td>Encrypt, erasure-code, distribute on Canadian-only nodes</td><td><span class="pill ok">Exists</span></td><td>Per-file encryption and erasure coding; CA-only placement; shards dealt across vendors</td><td>Connect ThinkOn as an S3-compatible connexion</td><td>This tab, shard placement and vendors</td></tr>
+      <tr><td>Immutable audit trail: campus, timestamp, status</td><td><span class="pill ok">Exists</span></td><td>Merkle checkpoints signed ML-DSA-87 / Ed25519, RFC 3161 anchored; audit log</td><td>Issuance record per credential, linked to its custody entry</td><td>This tab, issuance record and checkpoint</td></tr>
+      <tr><td>Public verification by link or QR, no login</td><td><span class="pill warn">Partial</span></td><td>No-login page checks a signed bundle against published keys</td><td>Per-credential public page the QR lands on</td><td>Employer verification, link and QR</td></tr>
+      <tr><td>Drag-and-drop file verification</td><td><span class="pill warn">Partial</span></td><td>Browser hashing in the upload path; custody verification</td><td>Dropzone that hashes locally and looks up the digest</td><td>Employer verification, Check a file</td></tr>
+      <tr><td>Authentic / tampered status</td><td><span class="pill ok">Exists</span></td><td>Answers authentic or failed</td><td>Wording and page design for employers</td><td>Every verification result</td></tr>
+      <tr><td>Apple Wallet and Google Wallet passes</td><td><span class="pill warn">Partial</span></td><td>Pass modules exist; the self-hosted pass is live</td><td>Native passes wait on Apple and Google issuer approval</td><td>Graduate wallet, pass styles</td></tr>
+      <tr><td>Expirable read-only sharing link</td><td><span class="pill ok">Exists</span></td><td>Expiry, download cap, optional password</td><td>Nothing</td><td>Graduate wallet, share form</td></tr>
+      <tr><td>Master evidence zip with cryptographic receipt</td><td><span class="pill warn">Partial</span></td><td>Signed receipts and custody proofs exist as artefacts</td><td>Assemble the zip</td><td>Graduate wallet, evidence package</td></tr>
+      <tr><td>Registrar on a skeleton staff</td><td><span class="pill warn">Partial</span></td><td>Tenancy, roles, scoped API keys, audit</td><td>Zero-training console: upload, review, issue</td><td>Registrar console, Acting as, Audit tab</td></tr>
+      <tr><td>Batches of 50 to 500 packages</td><td><span class="pill warn">Partial</span></td><td>Worker queue for background jobs</td><td>Batch orchestration for rendering</td><td>Registrar pipeline, capacity check</td></tr>
+      <tr><td>CSV or SIS HTML ingestion; branded PDFs</td><td><span class="pill bad">Build</span></td><td>Nothing renders documents</td><td>The rendering engine, the largest piece</td><td>Registrar console, document previews</td></tr>
+      <tr><td>Audit dashboard and dividend export</td><td><span class="pill bad">Build</span></td><td>Issuance and verification events are logged</td><td>The report and fee arithmetic</td><td>Audit &amp; reconciliation</td></tr>
+      <tr><td>Zero AI scraping</td><td><span class="pill ok">Exists</span></td><td>Ciphertext fragments, keys in custody, no public plaintext</td><td>Nothing</td><td>This tab, what an outside party sees</td></tr>
+      <tr><td>Zero PII in the pilot</td><td><span class="pill ok">Exists</span></td><td>A sandbox tenancy with fictional records</td><td>The fictional cohort</td><td>Whole demo (tenancy unf-sandbox)</td></tr>
+    </tbody></table></div>
+  </details>
   <div class="row"><label class="field" for="cust-sel">Graduate record<select id="cust-sel"></select></label></div>
   <div id="cust-body"></div>
 </section>
@@ -463,10 +532,29 @@ const PROGRAMS = {
 };
 const GP = {"A+":4.0,"A":4.0,"A-":3.7,"B+":3.3,"B":3.0,"B-":2.7,"C+":2.3,"C":2.0,"C-":1.7,"D":1.0,"F":0};
 const GRADES = Object.keys(GP);
-const NODES = [
-  {id:"TOR-1",city:"Toronto, ON"},{id:"MTL-1",city:"Montréal, QC"},{id:"OTT-1",city:"Ottawa, ON"},
-  {id:"CGY-1",city:"Calgary, AB"},{id:"VAN-1",city:"Vancouver, BC"},{id:"HFX-1",city:"Halifax, NS"}
+// Storage "connexions": each vendor holds at most 3 of 9 shards, below the 6 needed to rebuild.
+const VENDORS = [
+  {id:"thinkon", name:"ThinkOn", kind:"S3-compatible connexion", endpoint:"s3 endpoint · ca-central (sandbox)"},
+  {id:"vendorb", name:"Canadian vendor B", kind:"S3-compatible connexion", endpoint:"s3 endpoint · ca-east (sandbox)"},
+  {id:"vendorc", name:"Canadian vendor C", kind:"S3-compatible connexion", endpoint:"s3 endpoint · ca-west (sandbox)"},
 ];
+const NODES = [
+  {id:"TOR-1",city:"Toronto, ON",vendor:"thinkon"},{id:"MTL-1",city:"Montréal, QC",vendor:"thinkon"},
+  {id:"OTT-1",city:"Ottawa, ON",vendor:"vendorb"},{id:"HFX-1",city:"Halifax, NS",vendor:"vendorb"},
+  {id:"CGY-1",city:"Calgary, AB",vendor:"vendorc"},{id:"VAN-1",city:"Vancouver, BC",vendor:"vendorc"}
+];
+const ROLES = {
+  admin:{name:"Registrar admin", can:["issue","revoke","share","export"]},
+  staff:{name:"Registrar staff", can:["issue","share"]},
+  finance:{name:"Finance viewer", can:["export"]},
+};
+const API_KEYS = [
+  {name:"conferra-engine", scope:"assets:write custody:read", reach:"vault unf-credentials", expires:"2027-01-15"},
+  {name:"s3-bulk-ingest", scope:"s3:put", reach:"bucket unf-cohort-intake", expires:"2026-12-31"},
+  {name:"mcp-registrar-agent", scope:"custody:read verify:read", reach:"tenancy unf-sandbox", expires:"2026-11-16"},
+  {name:"verify-portal", scope:"verify:read", reach:"public verification", expires:"2027-10-16"},
+];
+const PUBLIC_KEYS = [{alg:"ML-DSA-87", id:"unf-sbx-pq-01"},{alg:"Ed25519", id:"unf-sbx-ed-01"}];
 const SPRING = [
   "student_id,first_name,last_name,program,conferral_date,grades",
   "UNF-2026-001,Jane,Smith,MSc Data Analytics,2026-06-15,DAT5010:A;DAT5020:A-;DAT5100:A;DAT5200:B+;DAT5300:A;DAT5900:A",
@@ -496,8 +584,12 @@ ${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[2]}, ${r[1]}</td><td>${r[3]}</td><td>
 const S = {
   view:"registrar", fmt:"csv", parsed:[], records:[], byId:new Map(), byAsset:new Map(), byHash:new Map(),
   log:[], leaves:[], root:"0".repeat(64), verifications:[], links:new Map(), batches:[], down:new Set(),
-  busy:false, gradSel:null, custSel:null, passStyle:"apple", vfMethod:"link", vfInput:"", sampleFor:null, customFiles:[],
+  busy:false, gradSel:null, custSel:null, passStyle:"self", vfMethod:"link", vfInput:"", sampleFor:null, customFiles:[],
+  role:"admin", channel:"rest", served:null, activity:[], checkpoints:[], unlocked:new Set(),
 };
+const can = action => ROLES[S.role].can.includes(action);
+function audit(action, target){ S.activity.push({at:new Date().toISOString(), role:ROLES[S.role].name, action, target:target||"—"}); }
+function denied(action){ toast(`${ROLES[S.role].name} can't ${action}. Switch "Acting as" to Registrar admin.`); }
 
 /* ---------- utils ---------- */
 const $ = (s,el=document)=>el.querySelector(s);
@@ -611,8 +703,21 @@ function transcriptText(r, courses = r.courses){
 /* ---------- SkyeConnex (simulated) ---------- */
 async function assetIdFor(studentId){ return "DOC-" + (await sha256("conferra:"+studentId)).slice(0,6).toUpperCase(); }
 function placeShards(seedHex){
-  const off = parseInt(seedHex.slice(0,2),16) % NODES.length;
-  return Array.from({length:9},(_,i)=>({label: i<6 ? `D${i+1}` : `P${i-5}`, node: NODES[(off+i)%NODES.length].id}));
+  // Deal shards round-robin across vendors so no vendor holds 6 (the rebuild threshold).
+  const off = parseInt(seedHex.slice(0,2),16);
+  return Array.from({length:9},(_,i)=>{
+    const v = VENDORS[(off+i) % VENDORS.length];
+    const vnodes = NODES.filter(n=>n.vendor===v.id);
+    return {label: i<6 ? `D${i+1}` : `P${i-5}`, node: vnodes[(Math.floor(i/VENDORS.length)+off) % vnodes.length].id};
+  });
+}
+const vendorOf = nodeId => NODES.find(n=>n.id===nodeId).vendor;
+async function signCheckpoint(root, at){
+  // Simulated signatures and RFC 3161 token: deterministic stand-ins, labelled as such in the UI.
+  return { root, at,
+    sigs:[{alg:"ML-DSA-87", key:PUBLIC_KEYS[0].id, sig:(await sha256("mldsa87|"+root)).slice(0,48)},
+          {alg:"Ed25519", key:PUBLIC_KEYS[1].id, sig:(await sha256("ed25519|"+root)).slice(0,48)}],
+    tsa:{standard:"RFC 3161", authority:"Independent timestamp authority (sandbox)", genTime:at, token:(await sha256("tsa|"+root+at)).slice(0,32)} };
 }
 async function merkleRoot(leaves){
   if(!leaves.length) return "0".repeat(64);
@@ -647,6 +752,7 @@ async function appendLog(type, assetId, at, extra={}){
   S.leaves.push(entry.leaf);
   S.root = await merkleRoot(S.leaves);
   entry.root = S.root;
+  entry.checkpoint = await signCheckpoint(S.root, at);
   S.log.push(entry);
   return entry;
 }
@@ -667,7 +773,14 @@ async function commitRecord(r, at, batchId){
   r.receipt = { assetId:r.assetId, issuer:INSTITUTION, studentId:r.studentId, credential:r.program, conferralDate:r.conferral, documentVersion:"1.0",
     documents:[{name:"Diploma.pdf",sha256:r.docs.diploma.hash},{name:"Transcript.pdf",sha256:r.docs.transcript.hash}],
     timestamp:at, status:"ACTIVE", residency:"CA", encryption:"AES-256-GCM", erasureCoding:"RS(6,3)", nodes:[...new Set(r.shards.map(s=>s.node))],
-    merkle:{leafIndex:r.leafIndex, leaf:e.leaf, rootAtIssue:e.root} };
+    vendors:VENDORS.map(v=>({vendor:v.name, shards:r.shards.filter(s=>vendorOf(s.node)===v.id).length})),
+    merkle:{leafIndex:r.leafIndex, leaf:e.leaf, rootAtIssue:e.root},
+    checkpoint:{signatures:e.checkpoint.sigs.map(s=>`${s.alg}:${s.key}`), timestamp:`${e.checkpoint.tsa.standard} ${e.checkpoint.tsa.genTime}`} };
+  // CONFERRA's issuance record: the per-credential page the QR lands on, linked to SkyeConnex custody entry #seq.
+  r.issuance = { credentialId:r.assetId, publicPage:verifyUrl(r), custodyEntry:e.seq, campus:"Niagara Falls, ON", batchId };
+  r.custodyProof = { assetId:r.assetId, leaf:e.leaf, leafIndex:r.leafIndex, path:await merkleProof(S.leaves, r.leafIndex), root:e.root, checkpoint:e.checkpoint };
+  r.proofBytes = enc.encode(JSON.stringify(r.custodyProof,null,2)).length;
+  r.proofHash = await sha256(JSON.stringify(r.custodyProof,null,2));
   r.wallet = { formatVersion:1, passTypeIdentifier:"pass.ca.unf.credential", serialNumber:r.assetId, organizationName:INSTITUTION,
     fields:{ name:`${r.first} ${r.last}`, credential:r.program, conferred:r.conferral }, barcode:{ format:"QR", message:verifyUrl(r) } };
   r.receiptBytes = enc.encode(JSON.stringify(r.receipt,null,2)).length;
@@ -691,9 +804,21 @@ function renderPreview(){
       <td>${r.error?`<span class="pill bad" title="${esc(r.error)}">Line ${r.line}: ${esc(r.error.split(";")[0])}</span>`: S.byId.has(r.studentId)?`<span class="pill neutral">Already issued</span>`:`<span class="pill ok">Ready</span>`}</td></tr>`).join("")}
   </tbody></table></div>`;
   const ready = ok.length - dup.length;
-  $("#issue-btn").disabled = S.busy || ready===0;
-  $("#issue-note").textContent = S.busy ? "Issuing…" : ready ? `${ready} graduate${ready>1?"s":""} ready to issue` : ok.length ? "Everyone in this file has already been issued." : "";
+  $("#issue-btn").disabled = S.busy || ready===0 || !can("issue");
+  $("#issue-note").textContent = !can("issue") ? `${ROLES[S.role].name} can't issue credentials.` : S.busy ? "Issuing…" : ready ? `${ready} graduate${ready>1?"s":""} ready to issue` : ok.length ? "Everyone in this file has already been issued." : "";
 }
+const CHANNELS = {
+  rest:{ label:"REST API", snippet:`POST /v1/vaults/unf-credentials/assets
+Authorization: Bearer sk_sbx_••••a91f   (scope assets:write · expires 2027-01-15)
+{ "studentId": "UNF-2026-004", "sha256": ["…", "…"], "residency": "CA" }` },
+  s3:{ label:"S3 gateway", snippet:`# any S3 client, pointed at the SkyeConnex gateway
+aws s3 cp ./fall-2026/ s3://unf-cohort-intake/2026F/ --recursive \\
+  --endpoint-url https://s3.gateway.skyeconnex.sandbox` },
+  mcp:{ label:"MCP tools", snippet:`# an agent calls SkyeConnex tools directly
+tool: skyeconnex.store_asset   { vault: "unf-credentials", file: "Okafor_Diploma.pdf", sha256: "…" }
+tool: skyeconnex.get_custody   { assetId: "DOC-…" }` },
+};
+function renderChannel(){ $("#channel-snippet").textContent = CHANNELS[S.channel].snippet; }
 function consoleLine(html){ const c=$("#console"); c.insertAdjacentHTML("beforeend", html+"\n"); c.scrollTop=c.scrollHeight; }
 const STEPS = [
   {k:"render", l:"Render PDFs", sx:false},
@@ -704,6 +829,7 @@ const STEPS = [
 ];
 async function issueCohort(){
   if(S.busy) return;
+  if(!can("issue")) return denied("issue credentials");
   const todo = S.parsed.filter(r=>!r.error && !S.byId.has(r.studentId));
   if(!todo.length) return;
   S.busy = true; renderPreview();
@@ -712,16 +838,25 @@ async function issueCohort(){
   $("#pipeline").innerHTML = todo.map(r=>`<div class="prow" id="pr-${esc(r.studentId)}"><div class="who"><b>${esc(r.first)} ${esc(r.last)}</b><span>${esc(r.studentId)} · ${esc(r.programKey)}</span></div>
     <div class="steps">${STEPS.map(s=>`<span class="step${s.sx?" sx":""}" data-s="${s.k}">${s.l}</span>`).join("")}</div><div class="pres muted">queued</div></div>`).join("");
   $("#console").innerHTML = "";
-  consoleLine(`<span class="d"># ${fmtTime(at0)}  batch ${batch.id}  ·  ${todo.length} packages  ·  SkyeConnex sandbox (simulated)</span>`);
-  consoleLine(`<span class="d">→ POST /v1/vaults/unf-credentials/batches  {"count":${todo.length},"residency":"CA"}</span>`);
+  const ch = S.channel;
+  consoleLine(`<span class="d"># ${fmtTime(at0)}  batch ${batch.id}  ·  ${todo.length} packages  ·  via ${CHANNELS[ch].label}  ·  SkyeConnex sandbox (simulated)</span>`);
+  consoleLine(`<span class="d">→ worker queue: job ${batch.id} enqueued (${todo.length} render + seal tasks, background)</span>`);
   for(const r of todo){
     const row = $(`#pr-${CSS.escape(r.studentId)}`);
     const step = async (k, fn, ms=160) => { const el=$(`[data-s="${k}"]`,row); el.classList.add("run"); if(fn) await fn(); await sleep(ms); el.classList.remove("run"); el.classList.add("done"); };
     $(".pres",row).textContent = "processing";
     await step("render", null, 220);
     await step("hash", async()=>{ await prepareDocs(r); consoleLine(`  sha256(${r.docs.diploma.name}) = <span class="k">${r.docs.diploma.hash}</span>`); consoleLine(`  sha256(${r.docs.transcript.name}) = <span class="k">${r.docs.transcript.hash}</span>`); });
-    await step("store", async()=>{ consoleLine(`→ POST /v1/vaults/unf-credentials/assets  {"studentId":"${r.studentId}","sha256":["${short(r.docs.diploma.hash,8)}","${short(r.docs.transcript.hash,8)}"]}`); }, 260);
-    await step("log", async()=>{ await commitRecord(r, new Date().toISOString(), batch.id); batch.count++; consoleLine(`← 201 {"assetId":"${r.assetId}","status":"ACTIVE","shards":9,"nodes":${r.receipt.nodes.length},"merkleLeaf":${r.leafIndex}}`); });
+    await step("store", async()=>{
+      const call = ch==="s3" ? `→ S3 PUT s3://unf-cohort-intake/2026F/${r.studentId}/ (2 objects)`
+                 : ch==="mcp" ? `→ MCP skyeconnex.store_asset {"studentId":"${r.studentId}","files":2}`
+                 : `→ POST /v1/vaults/unf-credentials/assets  {"studentId":"${r.studentId}","sha256":["${short(r.docs.diploma.hash,8)}","${short(r.docs.transcript.hash,8)}"]}`;
+      consoleLine(call);
+      consoleLine(`  SkyeConnex re-hashed on receipt: <span class="k">match</span> (a mismatch is refused) · encrypted · RS(6,3) dealt across 3 vendors, max 3 shards each`);
+    }, 260);
+    await step("log", async()=>{ await commitRecord(r, new Date().toISOString(), batch.id); batch.count++; const cp = S.log.at(-1).checkpoint;
+      consoleLine(`← 201 {"assetId":"${r.assetId}","status":"ACTIVE","shards":9,"vendors":3,"custodyEntry":${r.issuance.custodyEntry}}`);
+      consoleLine(`  checkpoint signed ML-DSA-87 + Ed25519 · anchored ${cp.tsa.standard} ${cp.tsa.genTime}`); });
     await step("wallet", async()=>{ consoleLine(`  wallet: ${r.assetId}.pkpass + Google Wallet object → ${verifyUrl(r)}`); }, 140);
     const p = $(".pres",row); p.classList.remove("muted"); p.textContent = r.assetId;
   }
@@ -731,6 +866,7 @@ async function issueCohort(){
   S.busy = false;
   S.gradSel = todo[0].studentId; S.custSel = todo[0].studentId;
   renderPreview(); renderHistory(); renderSelects();
+  audit(`Issued batch via ${CHANNELS[ch].label}`, `${batch.id} (${batch.count} packages)`);
   toast(`${batch.count} credentials issued and sealed`);
 }
 function labelForConferral(iso){ const m = Number(iso.slice(5,7)); const y = iso.slice(0,4); return (m<=7 ? "Spring " : "Fall ") + y + " convocation"; }
@@ -785,8 +921,11 @@ async function renderCustody(){
         ${pkgFile("Transcript.pdf", r.docs.transcript.bytes, r.docs.transcript.hash)}
         ${pkgFile("Receipt.json", r.receiptBytes, r.receiptHash)}
         ${pkgFile("Wallet.json", r.walletBytes, r.walletHash)}
+        ${pkgFile("CustodyProof.json", r.proofBytes, r.proofHash)}
       </ul>
       <p class="note">Public reference: <span class="mono">${esc(verifyUrl(r))}</span>. The documents themselves are never publicly addressable.</p>
+      <div class="stack" style="gap:6px"><div class="row"><span class="layer">CONFERRA</span><b style="font-size:.88rem">Issuance record</b><span class="note">linked to</span><span class="layer sx">SkyeConnex</span><b style="font-size:.88rem">custody entry #${r.issuance.custodyEntry}</b></div>
+        <dl class="kv"><dt>Credential ID</dt><dd class="mono">${r.issuance.credentialId}</dd><dt>Public page (QR target)</dt><dd class="mono">${esc(r.issuance.publicPage)}</dd><dt>Issuing campus</dt><dd>${r.issuance.campus}</dd><dt>Batch</dt><dd class="mono">${esc(r.issuance.batchId)}</dd></dl></div>
     </div>
     <div class="card">
       <div class="card-h"><h3>Custody record</h3><button class="btn sm" data-action="copy-receipt">Copy JSON</button></div>
@@ -799,6 +938,12 @@ async function renderCustody(){
     <div class="recover">${recoverable?`<span class="pill ok">Recoverable</span>`:`<span class="pill bad">Not recoverable</span>`}<span>${live} of 9 shards reachable · 6 needed${S.down.size?` · ${S.down.size} node${S.down.size>1?"s":""} offline`:""}</span></div>
   </div>
   <div class="card">
+    <div class="card-h"><h3>Vendors · no single operator can rebuild the record</h3><span class="note">Shards are dealt one vendor at a time. Each vendor holds at most 3 of the 6 shards needed.</span></div>
+    <div class="vendors">${VENDORS.map(v=>{ const n=r.shards.filter(s=>vendorOf(s.node)===v.id).length; const served=S.served===v.id; return `<div class="vendor${served?" served":""}"><div class="vh"><b>${esc(v.name)}</b><span class="pill ${n<6?"ok":"bad"}">${n} of 9 shards</span></div><span class="note">${v.kind}</span><span class="ep">${esc(v.endpoint)}</span><div><button class="btn sm" data-action="legal-order" data-vendor="${v.id}">${served?"Withdraw legal order":"Serve a legal order"}</button></div></div>`; }).join("")}</div>
+    ${S.served ? (()=>{ const v=VENDORS.find(x=>x.id===S.served); const n=r.shards.filter(s=>vendorOf(s.node)===v.id).length; return `<div class="recover"><span class="pill warn">Order served on ${esc(v.name)}</span><span>The order reaches ${n} encrypted shard${n>1?"s":""}, below the 6 needed to rebuild, and no keys. ${esc(v.name)} cannot hand over the record.</span></div>`; })() : ""}
+    <div class="stack" style="gap:6px"><b style="font-size:.88rem">What an outside party or AI scraper sees on any one node</b><div class="cipher">${await cipherPreview(r)}</div><span class="note">Ciphertext fragments only. Keys stay in custody and no plaintext is at rest anywhere public, so there is nothing to scrape.</span></div>
+  </div>
+  <div class="card">
     <div class="card-h"><h3>Merkle inclusion proof</h3>${ok?`<span class="pill ok">Proof verifies against current root</span>`:`<span class="pill bad">Proof failed</span>`}</div>
     <p class="note">The issuance entry is leaf ${r.leafIndex} of ${S.leaves.length} in the custody log. Hashing the leaf with these siblings reproduces the published root, so the entry can't be edited or removed without changing the root.</p>
     <div class="proof">
@@ -806,7 +951,19 @@ async function renderCustody(){
       ${proof.map((p,i)=>`<div><span class="lbl">Sibling ${i+1} (${p.right?"right":"left"})</span><span>${p.hash}</span></div>`).join("")}
       <div><span class="lbl"><b>Log root</b></span><span><b>${S.root}</b></span></div>
     </div>
+    ${checkpointHTML(S.log.at(-1).checkpoint)}
   </div>`;
+}
+function checkpointHTML(cp){
+  return `<div class="stack" style="gap:6px"><b style="font-size:.88rem">Signed checkpoint for this root <span class="pill neutral">signatures simulated</span></b>
+    <div class="proof">${cp.sigs.map(s=>`<div><span class="lbl">${s.alg} · ${s.key}</span><span>${s.sig}…</span></div>`).join("")}
+      <div><span class="lbl">${cp.tsa.standard} anchor</span><span>${esc(cp.tsa.authority)} · genTime ${cp.tsa.genTime} · token ${cp.tsa.token}…</span></div></div>
+    <span class="note">Post-quantum and classical signatures cover the root, and an independent RFC 3161 timestamp fixes when it existed, so the time of issue doesn't rest on anyone's clock.</span></div>`;
+}
+async function cipherPreview(r){
+  let h = await sha256("cipher|"+r.assetId), out = "";
+  for(let i=0;i<5;i++){ out += h; h = await sha256(h); }
+  return `shard D1 @ ${r.shards[0].node}  ${out.slice(0,300)}…`;
 }
 function pkgFile(name, bytes, hash){ return `<li class="file"><span class="ico">${ICON.file}</span><span>${name}</span><span class="muted mono">${bytes.toLocaleString()} B</span><span class="h">sha256 ${hash}</span></li>`; }
 function statusPill(s){ return s==="ACTIVE"?`<span class="pill ok">Active</span>`:`<span class="pill bad">Revoked</span>`; }
@@ -818,6 +975,14 @@ function makeQR(el, text, size){
   new QRCode(el, { text, width:size, height:size, colorDark:"#000000", colorLight:"#FFFFFF", correctLevel:QRCode.CorrectLevel.M });
 }
 function passHTML(r){
+  if(S.passStyle==="self") return `<div class="webpass">
+    <div class="urlbar">${ICON.lock}<span>${VERIFY_HOST}/p/${codeOf(r.assetId)}</span></div>
+    <div class="wb"><div class="wh">${ICON.crest}<div><div style="font-size:.8rem;font-weight:600;line-height:1.2">${INSTITUTION}</div><div class="live">Self-hosted pass · live</div></div></div>
+      <div><div class="lab">Graduate</div><div class="big">${esc(r.first)} ${esc(r.last)}</div></div>
+      <div><div class="lab">Credential</div><div class="val">${esc(r.program)}</div></div>
+      <div class="fields" style="display:grid;grid-template-columns:1fr auto;gap:10px"><div><div class="lab">Conferred</div><div class="val">${fmtDate(r.conferral)}</div></div><div><div class="lab">Status</div><div class="val">${r.status==="ACTIVE"?"Valid":"Revoked"}</div></div></div>
+      <button class="qrbox" data-action="scan-pass" data-asset="${r.assetId}" aria-label="Scan this QR code as an employer"><div class="qr" data-qr="${esc(verifyUrl(r))}"></div><small>${r.assetId}</small></button>
+      <span style="font-size:.72rem;color:#6B6253;text-align:center">Saved to the home screen. Works today on any phone.</span></div></div>`;
   if(S.passStyle==="google") return `<div class="pass google">
     <div class="gh">${ICON.crest}<div><div style="font-size:.78rem;font-weight:600">${INSTITUTION}</div><div style="font-size:.7rem;opacity:.85">Academic credential</div></div></div>
     <div class="gb"><div><div class="lab">Graduate</div><div class="big">${esc(r.first)} ${esc(r.last)}</div></div>
@@ -835,11 +1000,12 @@ function renderGraduate(){
   if(!r){ $("#grad-body").innerHTML = `<div class="empty">Issue a cohort to see graduate credentials.</div>`; return; }
   const links = [...S.links.values()].filter(l=>l.assetId===r.assetId).reverse();
   const zip = `UNF_${r.last}_${r.assetId}.zip`;
-  const total = r.docs.diploma.bytes + r.docs.transcript.bytes + r.receiptBytes + r.walletBytes;
+  const total = r.docs.diploma.bytes + r.docs.transcript.bytes + r.receiptBytes + r.walletBytes + r.proofBytes;
   $("#grad-body").innerHTML = `<div class="grad-grid">
     <div class="phone-col">
-      <div class="seg" id="pass-seg"><button data-pass="apple" class="${S.passStyle==="apple"?"on":""}">Apple Wallet</button><button data-pass="google" class="${S.passStyle==="google"?"on":""}">Google Wallet</button></div>
-      <div class="phone"><div class="phone-screen"><div class="ws">${S.passStyle==="apple"?"Wallet":"Google Wallet"}</div>${passHTML(r)}</div></div>
+      <div class="seg" id="pass-seg"><button data-pass="self" class="${S.passStyle==="self"?"on":""}">Self-hosted</button><button data-pass="apple" class="${S.passStyle==="apple"?"on":""}">Apple Wallet</button><button data-pass="google" class="${S.passStyle==="google"?"on":""}">Google Wallet</button></div>
+      ${S.passStyle==="self" ? `<span class="pill ok pending-badge">Live today</span>` : `<span class="pill warn pending-badge">Native pass waits on ${S.passStyle==="apple"?"Apple":"Google"} issuer approval (applied for)</span>`}
+      <div class="phone"><div class="phone-screen"><div class="ws">${S.passStyle==="apple"?"Wallet":S.passStyle==="google"?"Google Wallet":"Home screen"}</div>${passHTML(r)}</div></div>
       <p class="note" style="text-align:center;max-width:300px">Tap the QR code to scan it with the employer's phone.</p>
     </div>
     <div class="stack">
@@ -857,14 +1023,17 @@ function renderGraduate(){
           ${pkgFile("Transcript.pdf", r.docs.transcript.bytes, r.docs.transcript.hash)}
           ${pkgFile("Receipt.json", r.receiptBytes, r.receiptHash)}
           ${pkgFile("Wallet.json", r.walletBytes, r.walletHash)}
+          ${pkgFile("CustodyProof.json", r.proofBytes, r.proofHash)}
         </ul>
-        <p class="note">The graduate keeps this locally for life. Any copy can be checked against the custody record, even if UNF's systems change.</p>
+        <p class="note">The graduate keeps this locally for life. The signed receipt and custody proof (Merkle path, signed checkpoint, RFC 3161 timestamp) let any copy be checked, even if UNF's systems change.</p>
       </div>
       <div class="card">
         <h3>Share with an employer or IRCC</h3>
         <form class="edit-row" id="share-form">
           <label class="field" for="share-to">Recipient email<input type="email" id="share-to" placeholder="hiring@northwind.example" value="hiring@northwind.example"></label>
           <label class="field" for="share-exp">Link expires after<select id="share-exp"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select></label>
+          <label class="field" for="share-cap">View limit<select id="share-cap"><option value="0">No limit</option><option value="3">3 views</option><option value="5" selected>5 views</option><option value="10">10 views</option></select></label>
+          <label class="field" for="share-pw">Password (optional)<input type="text" id="share-pw" placeholder="none" autocomplete="off"></label>
           <button class="btn primary" type="submit">Create read-only link</button>
         </form>
         <div class="links">${links.length ? links.map(l=>linkHTML(l)).join("") : `<div class="empty">No share links yet. In the pilot, the link is emailed to the recipient. Here it's shown below.</div>`}</div>
@@ -874,17 +1043,22 @@ function renderGraduate(){
   document.querySelectorAll("#grad-body [data-qr]").forEach(el=>makeQR(el, el.dataset.qr, 150));
 }
 function linkHTML(l){
-  const expired = Date.now() > new Date(l.expires).getTime();
+  const capped = l.maxViews && l.views >= l.maxViews;
+  const expired = capped || Date.now() > new Date(l.expires).getTime();
   const url = `https://${VERIFY_HOST}/s/${l.token}`;
-  return `<div class="link"><div><div class="u">${url}</div><div class="m">To ${esc(l.to)} · ${expired?"expired":"expires"} ${fmtTime(l.expires)}</div></div>
-    <div class="row">${expired?`<span class="pill neutral">Expired</span>`:`<button class="btn sm" data-action="open-link" data-url="${url}">Open as recipient</button><button class="btn sm ghost" data-action="expire-link" data-token="${l.token}">Expire now</button>`}<button class="btn sm ghost" data-action="copy" data-text="${url}">Copy</button></div></div>`;
+  return `<div class="link"><div><div class="u">${url}</div><div class="m">To ${esc(l.to)} · ${Date.now() > new Date(l.expires).getTime()?"expired":"expires"} ${fmtTime(l.expires)} · ${l.maxViews?`${l.views} of ${l.maxViews} views`:`${l.views} views, no limit`}${l.password?" · password protected":""}</div></div>
+    <div class="row">${expired?`<span class="pill neutral">${capped?"View limit reached":"Expired"}</span>`:`<button class="btn sm" data-action="open-link" data-url="${url}">Open as recipient</button><button class="btn sm ghost" data-action="expire-link" data-token="${l.token}">Expire now</button>`}<button class="btn sm ghost" data-action="copy" data-text="${url}">Copy</button></div></div>`;
 }
 async function createLink(){
   const r = S.byId.get(S.gradSel); if(!r) return;
+  if(!can("share")) return denied("create share links");
   const to = $("#share-to").value.trim() || "recipient";
   const days = Number($("#share-exp").value);
+  const maxViews = Number($("#share-cap").value);
+  const password = $("#share-pw").value.trim();
   const token = (await sha256(r.assetId + Date.now() + Math.random())).slice(0,10);
-  S.links.set(token, { token, assetId:r.assetId, to, created:new Date().toISOString(), expires:new Date(Date.now()+days*864e5).toISOString() });
+  S.links.set(token, { token, assetId:r.assetId, to, created:new Date().toISOString(), expires:new Date(Date.now()+days*864e5).toISOString(), maxViews, views:0, password });
+  audit("Created share link", `${r.assetId} → ${to} (${days} days${maxViews?`, ${maxViews} views`:""}${password?", password":""})`);
   renderGraduate(); toast(`Link created, valid ${days} days`);
 }
 
@@ -974,7 +1148,9 @@ async function verifyByCode(raw, method="link"){
     const l = S.links.get(q.token);
     if(!l) res = {state:"unknown", method:"share link"};
     else if(Date.now() > new Date(l.expires).getTime()) res = {state:"expired", method:"share link", link:l, r:S.byAsset.get(l.assetId)};
-    else res = await recordResult(S.byAsset.get(l.assetId), "share link", {link:l});
+    else if(l.maxViews && l.views >= l.maxViews) res = {state:"capped", method:"share link", link:l, r:S.byAsset.get(l.assetId)};
+    else if(l.password && !S.unlocked.has(l.token)){ renderLocked(l, raw); return; }
+    else { l.views++; S.unlocked.delete(l.token); res = await recordResult(S.byAsset.get(l.assetId), "share link", {link:l}); }
   } else if(q.assetId){
     const r = S.byAsset.get(q.assetId);
     res = r ? await recordResult(r, method) : {state:"unknown", method, assetId:q.assetId};
@@ -982,6 +1158,11 @@ async function verifyByCode(raw, method="link"){
   res.ms = performance.now()-t0;
   logVerification(res.method, res.r?.assetId || q.assetId || "—", res.state);
   renderResult(res);
+}
+function renderLocked(l, raw){
+  $("#vf-result").innerHTML = `<div class="result warn" role="status"><div class="band">${ICON.lock}<div><h3>This link is password protected</h3><p>The graduate set a password on this share link. Enter it to view the credential.</p></div></div>
+    <div class="body"><form class="unlock" id="unlock-form" data-token="${l.token}" data-raw="${esc(raw)}"><label class="field" for="unlock-pw">Password<input type="text" id="unlock-pw" autocomplete="off"></label><button class="btn primary" type="submit">Unlock</button><span class="note" id="unlock-msg"></span></form></div></div>`;
+  $("#unlock-pw").focus();
 }
 async function recordResult(r, method, extra={}){
   const proof = await merkleProof(S.leaves, r.leafIndex);
@@ -1019,8 +1200,10 @@ function renderResult(res){
       ${C(true,"Issuer: Office of the Registrar, UNF")}
       ${C(true,"Status: active, not revoked")}
       ${C(res.proofOk,`Merkle inclusion proof verifies against log root ${short(S.root,8)}`)}
-      ${C(true,`Held on ${r.receipt.nodes.length} Canadian nodes (RS 6+3)`)}
-      ${res.link?C(true,`Share link valid until ${fmtTime(res.link.expires)}`):""}
+      ${C(true,`Signed bundle checked against published keys (${PUBLIC_KEYS.map(k=>k.alg).join(" + ")})`)}
+      ${C(true,`Issue time anchored by RFC 3161 timestamp, ${fmtTime(r.issuedAt)}`)}
+      ${C(true,`Held on Canadian nodes across ${VENDORS.length} vendors (RS 6+3, max 3 shards per vendor)`)}
+      ${res.link?C(true,`Share link valid until ${fmtTime(res.link.expires)}${res.link.maxViews?`, view ${res.link.views} of ${res.link.maxViews}`:""}`):""}
     </ul>${res.link?`<div class="row"><button class="btn sm" data-action="view-doc" data-asset="${r.assetId}" data-kind="diploma">View diploma</button><button class="btn sm" data-action="view-doc" data-asset="${r.assetId}" data-kind="transcript">View transcript</button></div>`:""}`;
   } else if(res.state==="tampered"){
     cls="bad"; icon=ICON.bad; title="Altered document";
@@ -1033,6 +1216,9 @@ function renderResult(res){
     cls="bad"; icon=ICON.warn; title="Credential revoked";
     text = `The registrar revoked this record on ${fmtTime(r.revokedAt)}. Contact the UNF Office of the Registrar before relying on it.`;
     right = `<ul class="checks">${C(true,"Custody record found")}${C(false,"Status: revoked")}${C(res.proofOk,"Revocation entry is in the Merkle log")}</ul>`;
+  } else if(res.state==="capped"){
+    cls="warn"; icon=ICON.warn; title="This share link has reached its view limit";
+    text = `The graduate allowed ${res.link.maxViews} views and all have been used. Ask them for a new link, or scan the QR code on their pass.`;
   } else if(res.state==="expired"){
     cls="warn"; icon=ICON.warn; title="This share link has expired";
     text = `The graduate's link expired on ${fmtTime(res.link.expires)}. Ask them for a new link, or scan the QR code on their wallet pass.`;
@@ -1087,7 +1273,7 @@ function renderAudit(){
     <div class="card">
       <div class="card-h"><h3>Verification queries</h3><span class="pill neutral">${S.verifications.length}</span></div>
       ${S.verifications.length ? `<div class="tablewrap"><table><thead><tr><th>Time</th><th>Method</th><th>Custody ID</th><th>Result</th></tr></thead><tbody>
-        ${S.verifications.slice().reverse().map(v=>`<tr><td>${fmtTime(v.at)}</td><td>${esc(v.method)}</td><td class="mono">${esc(v.assetId)}</td><td>${v.state==="valid"||v.result==="valid"?`<span class="pill ok">Authentic</span>`:v.result==="expired"?`<span class="pill warn">Expired link</span>`:v.result==="revoked"?`<span class="pill bad">Revoked</span>`:v.result==="tampered"?`<span class="pill bad">Altered</span>`:`<span class="pill neutral">No match</span>`}</td></tr>`).join("")}
+        ${S.verifications.slice().reverse().map(v=>`<tr><td>${fmtTime(v.at)}</td><td>${esc(v.method)}</td><td class="mono">${esc(v.assetId)}</td><td>${v.state==="valid"||v.result==="valid"?`<span class="pill ok">Authentic</span>`:v.result==="expired"?`<span class="pill warn">Expired link</span>`:v.result==="capped"?`<span class="pill warn">View limit</span>`:v.result==="locked"?`<span class="pill warn">Wrong password</span>`:v.result==="revoked"?`<span class="pill bad">Revoked</span>`:v.result==="tampered"?`<span class="pill bad">Altered</span>`:`<span class="pill neutral">No match</span>`}</td></tr>`).join("")}
       </tbody></table></div>` : `<div class="empty">No verifications yet. Try the Employer verification tab.</div>`}
     </div>
   </div>
@@ -1098,10 +1284,35 @@ function renderAudit(){
       ${mrows.map(([k,n])=>`<tr><td>${MONTHS[Number(k.slice(5))-1]} ${k.slice(0,4)}</td><td class="num">${n}</td><td class="num">${fmtMoney(n*FEE)}</td><td class="num">${fmtMoney(n*DIVIDEND)}</td></tr>`).join("")}
     </tbody><tfoot><tr><td>Total</td><td class="num">${total}</td><td class="num">${fmtMoney(total*FEE)}</td><td class="num">${fmtMoney(total*DIVIDEND)}</td></tr></tfoot></table></div>
     <div id="export-out"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-h"><h3>Tenancy and access</h3><span class="pill neutral">unf-sandbox · CA</span></div>
+      <p class="note">A sandbox tenancy with fictional records. Roles decide who can issue, revoke, share and export. Switch roles with "Acting as" at the top of the page.</p>
+      <div class="tablewrap"><table><thead><tr><th>Role</th><th>Issue</th><th>Revoke</th><th>Share</th><th>Export</th></tr></thead><tbody>
+        ${Object.entries(ROLES).map(([k,ro])=>`<tr><td><b>${ro.name}</b>${k===S.role?' <span class="pill ok">you</span>':""}</td>${["issue","revoke","share","export"].map(a=>`<td>${ro.can.includes(a)?"Yes":"—"}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div>
+      <b style="font-size:.88rem">API keys · scoped and expiring</b>
+      <div class="tablewrap"><table><thead><tr><th>Key</th><th>Scope</th><th>Reach</th><th>Expires</th></tr></thead><tbody>
+        ${API_KEYS.map(k=>`<tr><td class="mono">${k.name}</td><td class="mono">${k.scope}</td><td>${k.reach}</td><td>${k.expires}</td></tr>`).join("")}
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Activity audit log</h3><span class="pill neutral">${S.activity.length} actions</span></div>
+      <p class="note">Every action in the tenancy, with the role that took it.</p>
+      ${S.activity.length ? `<div class="tablewrap"><table><thead><tr><th>Time</th><th>Role</th><th>Action</th><th>Target</th></tr></thead><tbody>
+        ${S.activity.slice().reverse().map(a=>`<tr><td>${fmtTime(a.at)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${esc(a.target)}</td></tr>`).join("")}
+      </tbody></table></div>` : `<div class="empty">No actions yet.</div>`}
+    </div>
   </div>`;
+  $$("[data-action=revoke],[data-action=reinstate]").forEach(b=>{ if(!can("revoke")){ b.disabled=true; b.title=`${ROLES[S.role].name} can't revoke`; } });
+  const ex = $("[data-action=export]"); if(ex && !can("export")){ ex.disabled=true; }
 }
+const $$ = s => [...document.querySelectorAll(s)];
 function fmmt(n){ return "$"+n; }
 function exportReport(){
+  if(!can("export")) return denied("export reports");
+  audit("Exported monthly fee and dividend report", "CSV");
   const months = new Map();
   for(const r of S.records){ const k=r.conferral.slice(0,7); months.set(k,(months.get(k)||0)+1); }
   const lines = ["month,students,fees_cad,dividend_cad", ...[...months.entries()].sort().map(([k,n])=>`${k},${n},${(n*FEE).toFixed(2)},${(n*DIVIDEND).toFixed(2)}`)];
@@ -1109,7 +1320,9 @@ function exportReport(){
   $("#export-out").innerHTML = `<div class="stack" style="gap:8px"><pre class="code">${esc(csv)}</pre><div><button class="btn sm" data-action="copy" data-text="${esc(csv)}">Copy CSV</button></div></div>`;
 }
 async function setStatus(assetId, status){
+  if(!can("revoke")) return denied("revoke or reinstate records");
   const r = S.byAsset.get(assetId);
+  audit(status==="REVOKED"?"Revoked record":"Reinstated record", `${assetId} (${r.first} ${r.last})`);
   r.status = status;
   const at = new Date().toISOString();
   if(status==="REVOKED") r.revokedAt = at;
@@ -1140,7 +1353,8 @@ document.addEventListener("click", async e=>{
   if(act==="issue") issueCohort();
   else if(act==="reset-sample"){ $("#src").value = S.fmt==="csv" ? SAMPLE_CSV : csvToSisHtml(SAMPLE_CSV); parseSource(); }
   else if(act==="capacity") capacityCheck(a);
-  else if(act==="toggle-node"){ const n=a.dataset.node; S.down.has(n)?S.down.delete(n):S.down.add(n); renderCustody(); }
+  else if(act==="toggle-node"){ const n=a.dataset.node; S.down.has(n)?S.down.delete(n):S.down.add(n); audit(S.down.has(n)?"Simulated node outage":"Restored node", n); renderCustody(); }
+  else if(act==="legal-order"){ const v=a.dataset.vendor; S.served = S.served===v ? null : v; audit(S.served?"Simulated legal order on vendor":"Withdrew simulated legal order", VENDORS.find(x=>x.id===v).name); renderCustody(); }
   else if(act==="copy-receipt"){ const r=S.byId.get(S.custSel); copyText(JSON.stringify({...r.receipt,status:r.status},null,2)); }
   else if(act==="copy") copyText(a.dataset.text);
   else if(act==="view-doc"){ openDoc(S.byAsset.get(a.dataset.asset), a.dataset.kind); }
@@ -1166,11 +1380,18 @@ document.addEventListener("submit", e=>{
   e.preventDefault();
   if(e.target.id==="share-form") createLink();
   if(e.target.id==="vf-form") verifyByCode($("#vf-code").value, "link");
+  if(e.target.id==="unlock-form"){
+    const l = S.links.get(e.target.dataset.token);
+    if(l && $("#unlock-pw").value === l.password){ S.unlocked.add(l.token); verifyByCode(e.target.dataset.raw, "share link"); }
+    else { $("#unlock-msg").textContent = "That password doesn't match. Check with the graduate."; logVerification("share link", l?.assetId || "—", "locked"); }
+  }
 });
 document.addEventListener("change", async e=>{
   if(e.target.id==="grad-sel"){ S.gradSel=e.target.value; renderGraduate(); }
   if(e.target.id==="cust-sel"){ S.custSel=e.target.value; renderCustody(); }
   if(e.target.id==="sample-sel"){ S.sampleFor=e.target.value; renderVerifyPanel(); }
+  if(e.target.id==="channel-sel"){ S.channel=e.target.value; renderChannel(); }
+  if(e.target.id==="role-sel"){ S.role=e.target.value; audit("Switched role", ROLES[S.role].name); renderPreview(); go(S.view); toast(`Acting as ${ROLES[S.role].name}`); }
   if(e.target.id==="file-in" && e.target.files[0]){
     const f=e.target.files[0]; const text=await f.text();
     S.fmt = /\.html?$/i.test(f.name) || /<table/i.test(text) ? "html" : "csv";
@@ -1203,7 +1424,7 @@ document.addEventListener("drop", async e=>{
   S.batches.push({id:"B-20260615-1", label:"Spring 2026 convocation", sealedAt:at, count:spring.length, conferral:"2026-06-15", root:S.root});
   S.vfInput = `${VERIFY_HOST}/c/${codeOf(spring[0].assetId)}`;
   $("#src").value = SAMPLE_CSV; parseSource();
-  renderHistory(); renderSelects();
+  renderHistory(); renderSelects(); renderChannel();
   let v = "registrar"; try{ v = localStorage.getItem("conferra-view") || v; }catch{}
   go(v);
 })();
